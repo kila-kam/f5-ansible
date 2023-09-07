@@ -1,0 +1,13 @@
+---
+# tasks file for disable_vserver
+ - name: Disable  F5 Virtual Server
+   bigip_virtual_server:
+     partition: "{{ item.name.split('/')[0] }}"
+     name: "{{ item.name.split('/')[1]  }}"
+     state: "{{ desired_state }}"
+     provider: "{{ cred }}"
+     
+   loop:
+      "{{ markout }}"
+   when:
+    - active_device == true 

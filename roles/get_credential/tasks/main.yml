@@ -1,0 +1,24 @@
+---
+# tasks file for get_credential
+- name: Get get_credential
+  set_fact:
+   # f5username: "{{lookup('hashi_vault', 'secret=serviceaccounts/data/f5 validate_certsFalse'['username'] }}"
+   # f5password: "{{lookup('hashi_vault', 'secret=serviceaccounts/data/f5 validate_certsFalse'['password'] }}"
+    f5username: "ansible"
+    f5password: "Ans1bl3"
+  failed_when:
+    - not f5username
+    - not f5password
+  no_log: true
+  delegate_to: localhost
+
+- name: Create credential varibale
+  set_fact:
+    cred:
+      server: "{{ ansible_host }}" 
+      user: "{{ f5username }}"
+      password: "{{f5password }}"
+      validate_certs: no
+      no_f5_teem: True
+      timeout: 120
+      server_port: 443

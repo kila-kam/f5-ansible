@@ -1,0 +1,10 @@
+---
+- hosts: all
+  connection: local
+  gather_facts: False
+  roles:
+   - role: get_credential
+   - role: set_active_device
+   - role: disable_ltm_pool2
+  vars:
+    desired_state: forced_offline

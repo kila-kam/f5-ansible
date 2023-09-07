@@ -1,0 +1,15 @@
+---
+# tasks file for set_active_device
+ - name: register device failover status
+   bigip_command:
+     provider: "{{ cred }}"
+     commands:
+      - "tmsh show sys failover"
+   register: failoverStatus
+
+ - name: Set active device
+   set_fact:
+     active_device: true
+   when:
+      - "'active' in failoverStatus['stdout'][0]"
+

@@ -1,0 +1,27 @@
+---
+spd_lyr:
+  - name: getcreditcard
+    vs_ip_address: 172.16.10.1
+    vs_port: 80
+    snat_ip_address: 10.1.1.1
+    pool_members: '{{ members }}'
+    pool_port: 80
+    lb_method: round-robin
+    health_check_url: http://getcreditcard-health-ndc.example.com/management/health.html
+    health_monitor_port: 90
+    monitor_type: http
+  - name: getdebittransaction
+    vs_ip_address: 172.16.10.2
+    vs_port: 80
+    snat_ip_address: 10.1.1.2
+    pool_members: '{{ members }}'
+    pool_port: 80
+    lb_method: round-robin
+    health_check_url: http://getdebittransaction-health-ndc.example.com/management/health.html
+    health_monitor_port: 90
+    monitor_type: http
+markout:
+  - SN05-SI-GETCREDITCARD-NDC-80-POOL
+  - SN05-SI-GETDEBITTRANSACTION-NDC-80-POOL
+  - POSTV2
+

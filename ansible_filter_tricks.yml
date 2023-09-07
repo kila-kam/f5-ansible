@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: False
+
+  vars:
+    files:
+      users: /etc/passwd
+      groups: /etc/group
+      dns: /etc/hosts
+    files_dicts: "{{ files | dict2items(key_name='file', value_name='path') }}"
+
+    
+  tasks:
+  - name: ayo
+    debug:
+      var: files_dicts

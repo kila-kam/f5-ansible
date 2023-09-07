@@ -1,0 +1,27 @@
+---
+# tasks file for configure_health_monitor
+- name: Create  HTTP health monitor
+  bigip_monitor_http:
+    partition: Dev
+    state: "{{ desired_state }}"
+    send: "GET {{ item.health_check_url | urlsplit('path') }} HTTP/1.1 \\r\\nHost: {{ item.health_check_url | urlsplit('hostname') }}\\r\\n\\r\\n"
+    receive: "200"
+    name: "{{ env | upper }}-SI-{{ item.name | upper }}-HEALTH-{{ dc | upper }}-{{ item.health_monitor_port }}-MON"
+    provider: "{{ cred }}"
+  when: 
+    - item.monitor_type == "http"
+    - active_device == true 
+  with_items:
+    - "{{ spd_lyr }}"
+
+- name: Create TCP health monitor 
+  bigip_monitor_tcp:
+    partition: Dev
+    state: "{{ desired_state }}"
+    name: "{{ item.tcp_monitor_name }}"
+    provider: "{{ cred }}"
+  when:
+    - item.monitor_type == "tcp"
+    - active_device == true 
+  with_items:
+    - "{{ spd_lyr }}"

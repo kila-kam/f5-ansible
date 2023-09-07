@@ -1,0 +1,13 @@
+---
+- hosts: staging_ndc
+  connection: local
+  gather_facts: False
+  roles:
+   - role: get_credential
+   - role: set_active_device
+   - role: configure_health_monitor
+   - role: configure_pools
+   - role: configure_snat_pool
+   - role: configure_vserver
+  vars:
+    desired_state: present

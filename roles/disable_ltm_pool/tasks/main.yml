@@ -1,0 +1,48 @@
+---
+# tasks file for disable_ltm_pool
+- name: get ltm pool facts for Common Partition
+  bigip_device_info:
+   provider: "{{ cred }}"
+   gather_subset:
+    - ltm-pools
+  register: result
+  when: 
+   - active_device == true 
+
+- name: get ltm pool facts for Dev Partition
+  bigip_device_info:
+   provider: "{{ cred }}"
+   partition: Dev
+   gather_subset:
+    - ltm-pools
+  register: Dev_result
+  when: 
+   - active_device == true 
+
+- name: Change relevant pools to {{ desired_state }} on Common Partition
+  bigip_pool_member:
+   provider: "{{ cred }}"
+   state: "{{ desired_state }}"
+   pool: "{{ item.0.full_path }}"
+   name: "{{ item.1.name.split(':')[0] }}"
+   address: "{{ item.1.address }}"
+   port: "{{  item.1.name.split(':')[1] }}"
+  loop: 
+    "{{ result.ltm_pools | subelements('members') }}"
+  when: 
+   - 'item.0.name  in markout'
+   - active_device == true 
+
+- name: change relevant pools to {{ desired_state }} on Dev Partition
+  bigip_pool_member:
+   provider: "{{ cred }}"
+   state: "{{ desired_state }}"
+   pool: "{{ item.0.full_path }}"
+   name: "{{ item.1.name.split(':')[0] }}"
+   address: "{{ item.1.address }}"
+   port: "{{  item.1.name.split(':')[1] }}"
+  loop: 
+    "{{ Dev_result.ltm_pools | subelements('members') }}"
+  when: 
+   - 'item.0.name  in markout'
+   - active_device == true 

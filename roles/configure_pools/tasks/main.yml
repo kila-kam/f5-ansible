@@ -1,0 +1,32 @@
+---
+# tasks file for configure_pools
+ - name: create f5 pool
+   bigip_pool:
+     partition: Dev
+     state: "{{ desired_state }}"
+     name: "{{ env | upper }}-SI-{{ item.name | upper }}-{{ dc | upper }}-{{ item.pool_port }}-POOL"
+     lb_method: "{{ item.lb_method }}"
+     monitor_type: "and_list"
+     monitors: 
+     - "{{ env | upper }}-SI-{{ item.name | upper }}-HEALTH-{{ dc | upper }}-{{ item.health_monitor_port }}-MON"
+     - "{{ env | upper }}-SI-NEM-TCP-9443-MON"
+     provider: "{{ cred }}"
+     description: "{{ platform_env | upper }} {{ item.name | upper }} POOL"
+   with_items:
+    - "{{ spd_lyr }}"
+   when:
+    - active_device == true 
+
+ - name: configure pool and add pool members
+   bigip_pool_member:
+     state: "{{ desired_state }}"
+     pool: "/Dev/{{ env | upper }}-SI-{{ item.0.name | upper }}-{{ dc | upper }}-{{ item.0.pool_port }}-POOL"
+     name: "{{item.1.name }}"
+     address: "{{ item.1.ipv4 }}"
+     port: "{{ item.0.pool_port }}"
+     provider: "{{ cred }}"
+   loop: 
+     "{{ spd_lyr | subelements('pool_members') }}"
+ 
+   when:
+    - active_device == true 

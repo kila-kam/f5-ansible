@@ -1,0 +1,26 @@
+
+---
+- name: debug mode
+  hosts: all
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: debug
+      bigip_device_info:
+       provider: "{{ cred }}"
+       gather_subset:
+       # - nodes
+        - devices
+      register: result
+
+    - debug:
+   #     var: result.ansible_facts.ansible_net_devices.0.failover_state #'active_modules'
+   #     var:  item['address']
+       msg: 'this is the active device'
+    #  loop: "{{ result | json_query('ansible_facts.ansible_net_nodes[*]') }}"
+      when: "'active' in failoverStatus['stdout'][0]"
+
+
+#  roles:
+#   - { role: some_role, when: "ansible_os_family == 'RedHat'" }

@@ -1,0 +1,25 @@
+staging_ndc:
+  hosts:
+    192.168.1.254:
+  vars:
+    platform_env: resilience 
+    dc: ndc
+    env: sn05
+    active_device: false
+    members:
+     - name: "/Common/app1_svr1"
+       ipv4: 192.168.10.1
+     - name: "/Common/app1_svr2"
+       ipv4: 192.168.10.2
+     - name: "/Common/app1_svr3"
+       ipv4: 192.168.10.3
+routers:
+  hosts:
+    192.168.1.200:
+  vars:
+    ansible_ssh_pass: cisco
+    ansible_user: cisco
+    ansible_network_os: ios
+    ansible_connection: network_cli
+    ansible_password: cisco
+    auth_pass: cisco

@@ -1,0 +1,14 @@
+---
+# tasks file for configure_snat_pool
+- name: create snat pool 
+  bigip_snat_pool:
+    partition: Dev
+    name: "{{ env | upper }}-SI-{{ item.name | upper }}-{{ dc | upper }}-{{ item.vs_port}}-SNAT-POOL"
+    state: "{{ desired_state }}"
+    provider: "{{ cred }}"
+    members:
+      - "{{item.snat_ip_address }}"
+  with_items:
+    - "{{ spd_lyr }}"
+  when:
+    - active_device == true 

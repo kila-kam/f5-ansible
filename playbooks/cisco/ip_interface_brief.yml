@@ -1,0 +1,52 @@
+---
+- hosts: routers
+  gather_facts: false
+  
+  vars:
+    interfaces: []
+
+  tasks:
+  - name: Learn CDP With Pyats
+    ansible.utils.cli_parse:
+      command: show ip interface brief
+      parser: 
+        name: ansible.netcommon.pyats
+      set_fact: intf_output
+  
+  - name: Show Parsed Data
+    debug:
+      var: intf_output
+
+
+  - name: Output All Interfaces
+    debug:
+      msg: "{{ item }}"
+    with_items: "{{ intf_output.interface }}"
+
+  - set_fact:
+      interfaces: "{{ interfaces + [item.value.status] }}"
+    with_dict: "{{ intf_output.interface }}"
+
+  - name: Output All Interfaces
+    debug:
+      msg: "{{ interfaces }}"
+
+
+ # - set_fact:
+ #     intf_output:
+ #       interface: {}
+
+  - name: Combine Data
+    set_fact:
+      new_ints: "{{ new_ints | default({}) | combine({item.key: item.value.status}) }}"
+    with_dict: "{{ intf_output.interface }}"
+
+  - name: interface output 
+    debug:
+     msg: "{{ new_ints | default({}) }}"
+
+  
+  #- name: intf cgeck 
+   # debug:
+    #  msg: "{{ item }}"
+    #loop: "{{ new_ints.keys() | sort }}" 

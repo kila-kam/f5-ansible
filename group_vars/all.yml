@@ -1,0 +1,12 @@
+---
+ cred:
+  server: "{{ ansible_host }}"
+  user: "ansible"
+  password: "Ans1bl3"
+  validate_certs: no
+  no_f5_teem: True
+  timeout: 120
+
+ 
+ config: ansible_project
+ user_data_path: report_dir

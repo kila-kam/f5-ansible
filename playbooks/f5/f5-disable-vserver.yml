@@ -1,0 +1,10 @@
+---
+- hosts: staging_ndc
+  connection: local
+  gather_facts: False
+  roles:
+   - role: get_credential
+   - role: set_active_device
+   - role: disable_vserver
+  vars:
+    desired_state: disabled

@@ -1,0 +1,19 @@
+---
+# tasks file for configure_vserver
+ - name: configure  F5 Virtual Server
+   bigip_virtual_server:
+     partition: Dev
+     name: "{{ env | upper }}-SI-{{ item.name | upper }}-{{ dc | upper }}-{{ item.vs_port }}-STD_VS"
+     all_profiles:
+        - http
+     destination: "{{ item.vs_ip_address }}"
+     port: "{{ item.vs_port }}"
+     pool: "{{ env | upper }}-SI-{{ item.name | upper }}-{{ dc | upper }}-{{ item.pool_port }}-POOL"
+     snat: "{{ env | upper }}-SI-{{ item.name | upper }}-{{ dc | upper }}-{{ item.vs_port}}-SNAT-POOL"
+     state: "{{ desired_state }}"
+     provider: "{{ cred }}"
+     description: "{{ platform_env | upper }} {{ item.name | upper }} VIP"
+   with_items:
+     - "{{ spd_lyr }}"
+   when:
+    - active_device == true 

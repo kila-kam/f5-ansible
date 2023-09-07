@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  gather_facts: false
+  
+
+  tasks:
+  - name: Combine Data
+    set_fact:
+      new_ints: "{{ new_ints | default([]) }}"
+
+  - name: Output All Interfaces
+    debug:
+      msg: "{{ new_ints }}"
+
+
+#ansible all -m debug -a "var=hostvars[inventory_hostname]" -i network_devices
+

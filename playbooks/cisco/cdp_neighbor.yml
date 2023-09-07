@@ -1,0 +1,44 @@
+---
+- hosts: routers
+  gather_facts: false
+  
+  vars:
+    cdp_neighbors: []
+    cdp_interface: []
+    cdp_neighborspost: []
+    cdp_interfacepost: []
+
+  tasks:
+  - name: Learn CDP With Pyats
+    ansible.utils.cli_parse:
+      command: show cdp neighbors
+      parser: 
+        name: ansible.netcommon.pyats
+      set_fact: cdp_output
+
+  - name: Show CDP output
+    debug:
+      var: cdp_output
+
+  - set_fact:
+      cdp_neighbors: "{{ cdp_neighbors + [item.value.device_id] }}"
+    with_dict: "{{ cdp_output.cdp.index }}"
+
+  - set_fact:
+      cdp_interface: "{{ cdp_interface + [item.value.local_interface] }}"
+    with_dict: "{{ cdp_output.cdp.index }}"
+
+  - name: Show CDP Interface
+    debug:
+      var: cdp_interface
+
+  - name: Combine Neighbor and interface and create a list of dictionaries
+    set_fact:
+      neighbor_details: "{{ dict(cdp_neighbors | zip(cdp_interface) ) | dict2items(key_name='neighbour', value_name='interface') }}"
+
+#zip combines the 2 lists together 
+
+  - name: Show Neighbour Details 
+    debug:
+      var: neighbor_details
+
