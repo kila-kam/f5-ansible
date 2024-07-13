@@ -1,0 +1,96 @@
+---
+- name: Mark down F5 GSLB pool member in dev  NDC
+  hosts: dev_f5
+  connection: local
+  gather_facts: true
+
+  tasks:
+  - name: Get credentials
+    set_fact:
+      ansible_user: "{{ lookup ('env', 'ANSIBLE_NET_USERNAME') }}"
+      ansible_password:  "{{ lookup ('env', 'ANSIBLE_NET_PASSWORD') }}"
+    failed_when:
+     - not ansible_user
+     - not ansible_password 
+    no_log: true
+    tags: audit
+
+  - name: Pull out resource variables from service definition
+    set_fact:
+      service_resources: "{{ next_definition }}"
+    loop: "{{ dev_resource_definition }}"
+    loop_control:
+      loop_var: next_definition
+    when: next_definition.name == "gtm_resource_group"
+    tags: audit
+ 
+  - name: Set condition for pool members 
+    set_fact:
+      prefix: NDC
+
+  - name: Fail if no data found.
+    fail:
+      msg: "Failure due to no data found"
+    when: service_resources is undefined
+    tags: audit
+
+  - name: Mark down f5 pools in dev NDC
+    block:
+     - name: Check state of F5 device and set active device details
+       include_role: 
+         name: f5_single_device_manager_role
+
+     - name: Mark GSLB pools down using REST
+       include_role:
+         name: f5_gslb_manager
+       vars:
+         partition: "{{ service_resources.partition }}"
+         gslb_pool_name: "{{ next_gslb_pool_name }}"
+         operation: disable
+       loop: "{{ service_resources.gslb_pool_name }}"
+       loop_control:
+         loop_var: next_gslb_pool_name
+       tags: change
+
+     - name: Set facts for post validation 
+       set_fact:
+         parsed_post_gtm_pool_stats: "{{ parsed_post_gtm_pool_stats | default([]) }}"
+ 
+     - name: Pull out post validation output 
+       include_role:
+         name: f5_gslb_manager
+       vars:
+         partition: "{{ service_resources.partition }}"
+         gslb_pool_name: "{{ next_gslb_pool_name }}"
+       loop: "{{ service_resources.gslb_pool_name }}"
+       loop_control:
+         loop_var: next_gslb_pool_name
+       tags: audit
+      
+     - name: Verify that GSLB pool state is disabled
+       assert:
+         that:
+           - "item['status.enabledState']['description'] == 'disabled'"
+       when:
+        - "prefix in item['vsName']['description'] | upper"
+        - "prefix in item['serverName']['description'] | lower"
+       loop:  "{{ parsed_post_gtm_pool_stats }}"
+
+    rescue:
+     - name: Activity log entry
+       set_fact: 
+         activity_log: "{{'Mark up failed for one of pools in - ' + service_resources.name }}"
+       tags: audit
+    
+     - name: Output activity log.
+       fail:
+         msg: "{{ activity_log }}"
+       tags: audit 
+
+#
+## add  varibales to indicate if you want to save objects as csv or save output
+#
+ #  - name: Save JSON content
+ ##   copy:
+ ##     dest: "./files/{{ inventory_hostname }}-gtm_pool.json"
+ ##     content: "{{ parsed_gtm_pool  | to_nice_json }}"
