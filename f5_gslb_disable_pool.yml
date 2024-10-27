@@ -1,5 +1,5 @@
 ---
-- name: Mark down F5 GSLB pool member in dev  NDC
+- name: Mark down F5 GSLB pool member in dev
   hosts: dev_f5
   connection: local
   gather_facts: true
@@ -26,7 +26,7 @@
  
   - name: Set condition for pool members 
     set_fact:
-      prefix: NDC
+      prefix: STC
 
   - name: Fail if no data found.
     fail:
@@ -34,7 +34,7 @@
     when: service_resources is undefined
     tags: audit
 
-  - name: Mark down f5 pools in dev NDC
+  - name: Mark down f5 pools in dev
     block:
      - name: Check state of F5 device and set active device details
        include_role: 
@@ -80,7 +80,7 @@
      - name: Activity log entry
        set_fact: 
          activity_log: "{{'Mark up failed for one of pools in - ' + service_resources.name }}"
-       tags: audit
+       tags: audit 
     
      - name: Output activity log.
        fail:

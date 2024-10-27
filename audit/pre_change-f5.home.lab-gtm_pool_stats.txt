@@ -1,0 +1,8 @@
+---
+/Common/lon1-f5-dev.local, /Common/gslb_pool_1, /Common/NDC-gslb-http_vs, Available
+/Common/lon1-f5-dev.local, /Common/gslb_pool_1, /Common/STC-gslb-http_vs, Available
+/Common/lon1-f5-dev.local, /Common/gslb_pool_2, /Common/NDC-gslb-http_vs, Available
+/Common/lon1-f5-dev.local, /Common/gslb_pool_2, /Common/STC-gslb-http_vs, Available
+/Common/lon1-f5-dev.local, /Common/gslb_pool_3, /Common/STC-gslb-http_vs, Available
+/Common/lon1-f5-dev.local, /Common/gslb_pool_3, /Common/ssh_xbuntu_mgmt,  Monitor /Common/bigip from <unknown> : no reply from big3d: timed out
+

@@ -1,0 +1,14 @@
+---
+- name: Create Nodes
+  uri: 
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/node
+    method: POST
+    validate_certs: false
+    body_format: json
+    headers:
+       X-F5-Auth-Token: "{{ bigip_auth_token }}"
+    body:
+      name: "{{ item.node }}"
+      address: "{{ item.address }}"
+  delegate_to: localhost
+  loop: "{{ nodes }}"

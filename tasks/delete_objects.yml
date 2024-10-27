@@ -1,0 +1,9 @@
+---
+- name: Delete Objects
+  uri:
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/{{ uri }}/{{ resource.name }}
+    method: DELETE
+    validate_certs: false
+    headers:
+       X-F5-Auth-Token: "{{ bigip_auth_token }}"
+  delegate_to: localhost

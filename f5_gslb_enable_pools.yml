@@ -1,5 +1,5 @@
 ---
-- name: Mark up F5 GSLB pool member in dev  NDC
+- name: Mark up F5 GSLB pool member in dev
   hosts: dev_f5
   connection: local
   gather_facts: true
@@ -24,38 +24,42 @@
     when: next_definition.name == "gtm_resource_group"
     tags: audit
  
+  - name: Set condition for pool members 
+    set_fact:
+      prefix: STC
+      server_name: DEV
+
   - name: Fail if no data found.
     fail:
       msg: "Failure due to no data found"
     when: service_resources is undefined
     tags: audit
 
-  - name: Mark up f5 pools in dev NDC
+  - name: Mark down f5 pools in dev
     block:
      - name: Check state of F5 device and set active device details
        include_role: 
          name: f5_single_device_manager_role
 
-     - name: Mark GSLB pools up using REST
+     - name: Mark GSLB pools down using REST
        include_role:
          name: f5_gslb_manager
        vars:
          partition: "{{ service_resources.partition }}"
          gslb_pool_name: "{{ next_gslb_pool_name }}"
          operation: enable
-         pool_member_prefix: NDC
        loop: "{{ service_resources.gslb_pool_name }}"
        loop_control:
          loop_var: next_gslb_pool_name
        tags: change
 
-     - name: Set facts for post validation output
+     - name: Set facts for post validation 
        set_fact:
          parsed_post_gtm_pool_stats: "{{ parsed_post_gtm_pool_stats | default([]) }}"
  
-     - name: Post Validation of GSLB pools
+     - name: Pull out post validation output 
        include_role:
-        name: f5_gslb_manager
+         name: f5_gslb_manager
        vars:
          partition: "{{ service_resources.partition }}"
          gslb_pool_name: "{{ next_gslb_pool_name }}"
@@ -63,12 +67,21 @@
        loop_control:
          loop_var: next_gslb_pool_name
        tags: audit
+      
+     - name: Verify that GSLB pool state is enabled
+       assert:
+         that:
+           - "item['status.enabledState']['description'] == 'enabled'"
+       when:
+        - "prefix | lower in item['vsName']['description'] or prefix | upper in item['vsName']['description']"
+        - "server_name | lower in item['serverName']['description'] or server_name | upper in item['serverName']['description']"
+       loop:  "{{ parsed_post_gtm_pool_stats }}"
 
     rescue:
      - name: Activity log entry
        set_fact: 
          activity_log: "{{'Mark up failed for one of pools in - ' + service_resources.name }}"
-       tags: audit
+       tags: audit 
     
      - name: Output activity log.
        fail:
@@ -76,9 +89,9 @@
        tags: audit 
 
 #
- ##add  varibales to indicate if you want to save objects as csv or save output
+## add  varibales to indicate if you want to save objects as csv or save output
 #
- ## - name: Save JSON content
+ #  - name: Save JSON content
  ##   copy:
  ##     dest: "./files/{{ inventory_hostname }}-gtm_pool.json"
  ##     content: "{{ parsed_gtm_pool  | to_nice_json }}"

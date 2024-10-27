@@ -1,0 +1,25 @@
+---
+- name: Create Pool
+  uri: 
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/pool
+    method: POST
+    validate_certs: false
+    body_format: json
+    headers:
+       X-F5-Auth-Token: "{{ bigip_auth_token }}"
+    body:
+      name: "{{ pool.name }}"
+  delegate_to: localhost
+
+- name: Add Pool Members
+  uri: 
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/pool/~Common~{{ pool.name }}/members/
+    method: POST
+    validate_certs: false
+    body_format: json
+    headers:
+      X-F5-Auth-Token: "{{ bigip_auth_token }}"
+    body:
+      name: "{{ item.name }}:{{ item.port }}"
+  delegate_to: localhost
+  loop: "{{ pool.members }}"

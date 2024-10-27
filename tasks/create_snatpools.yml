@@ -1,0 +1,13 @@
+---
+- name: Create SNAT pool
+  uri: 
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/snatpool
+    method: POST
+    validate_certs: false
+    body_format: json
+    headers:
+       X-F5-Auth-Token: "{{ bigip_auth_token }}"
+    body:
+      name: "{{ snat.name }}"
+      members: "{{ snat.members }}"
+  delegate_to: localhost

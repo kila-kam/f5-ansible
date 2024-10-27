@@ -1,0 +1,41 @@
+- name: Delete Stuff
+  connection: local
+  gather_facts: false
+  hosts: dev_f5
+  tasks:
+    - name: Login to F5 IControl REST
+      include_role:
+        name: f5_rest_login
+
+    - name: Delete Virtuals
+      include_tasks:
+        file: './tasks/delete_objects.yml'
+      vars:
+        uri: virtual
+        resource: "{{ item }}"
+      loop:  "{{ ltm_resource_def.virtuals  }}"
+    
+    - name: Delete SNAT Pools
+      include_tasks:
+        file: './tasks/delete_objects.yml'
+      vars:
+        uri: snatpool
+        resource: "{{ item }}"
+      loop:  "{{ ltm_resource_def.snat_pools }}"
+
+    - name: Delete Pools
+      include_tasks:
+        file: './tasks/delete_objects.yml'
+      vars:
+        uri: pool
+        resource: "{{ item }}"
+      loop:  "{{ ltm_resource_def.ltm_pools }}"
+
+    - name: Delete Nodes
+      include_tasks:
+        file: './tasks/delete_objects.yml'
+      vars:
+        uri: node
+        resource:
+          name: "{{ item.node }}"
+      loop:  "{{ ltm_resource_def.ltm_nodes }}"

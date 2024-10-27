@@ -3,7 +3,6 @@
    hosts: dev_f5
    connection: local
    gather_facts: false
-
    tasks:
    - name: Get credentials
      set_fact:
@@ -45,5 +44,5 @@
 
    - name: Save content of REST API
      copy:
-       dest: "./files/{{ inventory_hostname }}.json"
+       dest: "./files/{{ inventory_hostname }}-virtual.json"
        content: "{{ parsed_vs_rest_list  | to_nice_json }}"

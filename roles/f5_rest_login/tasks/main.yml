@@ -1,5 +1,16 @@
 ---
 # tasks file for f5_rest_logins
+
+ - name: Get credentials
+   set_fact:
+     ansible_user: "{{ lookup('env', 'ANSIBLE_NET_USERNAME')}}"
+     ansible_password: "{{ lookup('env', 'ANSIBLE_NET_PASSWORD' )}}"
+   failed_when:
+    - not ansible_user
+    - not ansible_password
+   no_log: false
+   tags: audit
+   
  - name: login to F5 via REST API 
    uri:
      url: https://{{ ansible_host }}/mgmt/shared/authn/login
@@ -7,8 +18,8 @@
      body_format: json
      validate_certs: false
      body:
-       username: "{{ net_username }}"
-       password: "{{ net_password }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        loginProviderName: "tmos"
    register: login
    delegate_to: localhost

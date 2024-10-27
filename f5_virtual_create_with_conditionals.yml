@@ -1,0 +1,96 @@
+---
+- name: Create Virtual Server
+  connection: local
+  gather_facts: false
+  hosts: dev_f5
+  tasks:
+    - name: Login to F5 IControl REST
+      include_role:
+        name: f5_rest_login
+
+    - name: Check URLs in F5 using REST API
+      set_fact:
+        f5_data: "{{ lookup('file', './data/{{ inventory_hostname }}-f5-data.json') }}"
+
+    - name: Set variables
+      set_fact: 
+        node_addr_list: "{{ f5_data[0]['json']['items']  | map(attribute='address') }}"
+        node_name_list: "{{ f5_data[0]['json']['items']  | map(attribute='name') }}"
+        snat_name_list: "{{ f5_data[1]['json']['items']  | map(attribute='name') }}"
+        snat_ip_list: "{{ f5_data[2]['json']['items']  | map(attribute='name') }}"
+        pool_list: "{{ f5_data[3]['json']['items']  | map(attribute='name') }}"
+
+    - name: Create Node address 
+      uri: 
+        url: https://{{ ansible_host }}/mgmt/tm/ltm/node
+        method: POST
+        validate_certs: false
+        body_format: json
+        headers:
+           X-F5-Auth-Token: "{{ bigip_auth_token }}"
+        body:
+          name: "{{ item.node }}"
+          address: "{{ item.address }}"
+      delegate_to: localhost
+      when: 
+        - item.node not in node_name_list
+        - item.address not in node_addr_list
+      loop: "{{ nodes }}"
+  
+    - name: Create SNAT pool
+      uri: 
+        url: https://{{ ansible_host }}/mgmt/tm/ltm/snatpool
+        method: POST
+        validate_certs: false
+        body_format: json
+        headers:
+           X-F5-Auth-Token: "{{ bigip_auth_token }}"
+        body:
+          name: "{{ snat.name }}"
+          members: "{{ snat.members }}"
+      delegate_to: localhost
+      when:
+         - snat.name not in snat_name_list 
+         - snat.members[0] not in snat_ip_list
+
+    - name: Create Pool
+      uri: 
+        url: https://{{ ansible_host }}/mgmt/tm/ltm/pool
+        method: POST
+        validate_certs: false
+        body_format: json
+        headers:
+           X-F5-Auth-Token: "{{ bigip_auth_token }}"
+        body:
+          name: "{{ pool.name }}"
+      delegate_to: localhost
+      when:
+         - pool.name not in pool_list 
+
+    - name: Add Pool Members
+      uri: 
+        url: https://{{ ansible_host }}/mgmt/tm/ltm/pool/~Common~{{ pool.name }}/members/
+        method: POST
+        validate_certs: false
+        body_format: json
+        headers:
+           X-F5-Auth-Token: "{{ bigip_auth_token }}"
+        body:
+          name: "{{ item }}:80"
+      delegate_to: localhost
+      loop: "{{ pool.members }}"
+
+    - name: Create Virtual Server
+      uri: 
+        url: https://{{ ansible_host }}/mgmt/tm/ltm/virtual/
+        method: POST
+        validate_certs: false
+        body_format: json
+        headers:
+           X-F5-Auth-Token: "{{ bigip_auth_token }}"
+        body:
+          name: "{{ virtual.name }}"
+          destination: "{{ virtual.destination }}:{{ virtual.port }}"
+          ipProtocol: "tcp"
+          pool: "{{ virtual.pool }}"
+      delegate_to: localhost

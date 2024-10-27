@@ -14,3 +14,33 @@ dev_resource_definition:
     - gslb_pool_1
     - gslb_pool_2
     - gslb_pool_3
+
+ltm_resource_def:
+  ltm_nodes:
+   - node: myNode
+     address: 1.2.3.4
+   - node: myNode_1
+     address: 1.2.3.5
+   - node: myNode_2
+     address: 1.2.3.6
+  snat_pools:
+   - name: TestSnatPool
+     members: [ '3.3.3.1']
+   - name: TestSnatPool_1
+     members: [ '3.3.3.2']
+   - name: TestSnatPool_2
+     members: [ '3.3.3.3']
+  ltm_pools:
+   - name: MyTestPool
+     members:
+     - name: 'myNode'
+       port: 80
+     - name: 'myNode_1'
+       port: 80
+     - name: 'myNode_2'
+       port: 80
+  virtuals:
+   - name: MyVirtual
+     destination: 2.2.2.1
+     port: 80
+     pool: MyTestPool

@@ -1,0 +1,15 @@
+---
+- name: Create Virtual Server
+  uri: 
+    url: https://{{ ansible_host }}/mgmt/tm/ltm/virtual/
+    method: POST
+    validate_certs: false
+    body_format: json
+    headers:
+       X-F5-Auth-Token: "{{ bigip_auth_token }}"
+    body:
+      name: "{{ virtual.name }}"
+      destination: "{{ virtual.destination }}:{{ virtual.port }}"
+      ipProtocol: "tcp"
+      pool: "{{ virtual.pool }}"
+  delegate_to: localhost

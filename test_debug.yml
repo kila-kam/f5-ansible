@@ -1,0 +1,17 @@
+---
+- name: Debug
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: testing out some new stuff
+    set_fact: 
+      stuff: "hello World?"
+
+  - name: debug
+    debug:
+      msg: "{{ stuff  | upper }}"
+
+  - name: Assert
+    assert:
+      that:
+       - "'{{ hello | upper }}' in stuff"

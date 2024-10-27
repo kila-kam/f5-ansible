@@ -4,14 +4,6 @@
   connection: local
   gather_facts: true
 
-  vars_prompt:
-    - name: net_username
-      prompt: "Enter your Username"
-      private: no
-    - name: net_password
-      prompt: "Enter your password"
-      private: yes
-
   tasks:
   - name: Get credentials
     set_fact:
@@ -55,4 +47,5 @@
   - name: Save pre-change output
     template: 
       src: gtm.j2 
-      dest: "./output/pre_change-{{ inventory_hostname }}-gtm_pool_stats-{{ ansible_date_time.iso8601 }}.txt"
+      #dest: "./audit/pre_change-{{ inventory_hostname }}-gtm_pool_stats-{{ ansible_date_time.iso8601 }}.txt"
+      dest: "./audit/pre_change-{{ inventory_hostname }}-gtm_pool_stats.txt"
