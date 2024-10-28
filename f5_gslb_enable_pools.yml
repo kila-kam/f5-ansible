@@ -26,8 +26,7 @@
  
   - name: Set condition for pool members 
     set_fact:
-      prefix: STC
-      server_name: DEV
+      datacentre: STC
 
   - name: Fail if no data found.
     fail:
@@ -73,8 +72,8 @@
          that:
            - "item['status.enabledState']['description'] == 'enabled'"
        when:
-        - "prefix | lower in item['vsName']['description'] or prefix | upper in item['vsName']['description']"
-        - "server_name | lower in item['serverName']['description'] or server_name | upper in item['serverName']['description']"
+        - "datacentre | lower in item['vsName']['description'] or datacentre | upper in item['vsName']['description']"
+        - "datacentre | lower in item['serverName']['description'] or datacentre | upper in item['serverName']['description']"
        loop:  "{{ parsed_post_gtm_pool_stats }}"
 
     rescue:
@@ -87,11 +86,3 @@
        fail:
          msg: "{{ activity_log }}"
        tags: audit 
-
-#
-## add  varibales to indicate if you want to save objects as csv or save output
-#
- #  - name: Save JSON content
- ##   copy:
- ##     dest: "./files/{{ inventory_hostname }}-gtm_pool.json"
- ##     content: "{{ parsed_gtm_pool  | to_nice_json }}"

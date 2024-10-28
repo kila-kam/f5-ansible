@@ -23,7 +23,7 @@
   register: rest
   when: 
    - operation is defined
-   - prefix in item['vsName']['description'] | upper
+   - datacentre | upper in item['vsName']['description'] | upper
   loop: "{{ parsed_gtm_pool_stats }}"
 
 - name: Gather post-change GSLB pool data 
