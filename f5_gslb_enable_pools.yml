@@ -34,13 +34,13 @@
     when: service_resources is undefined
     tags: audit
 
-  - name: Mark down f5 pools in dev
+  - name: Mark up f5 pools in dev
     block:
      - name: Check state of F5 device and set active device details
        include_role: 
          name: f5_single_device_manager_role
 
-     - name: Mark GSLB pools down using REST
+     - name: Mark GSLB pools up using REST
        include_role:
          name: f5_gslb_manager
        vars:
